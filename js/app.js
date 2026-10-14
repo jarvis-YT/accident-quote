@@ -1,6 +1,6 @@
 /* =====================================================================
  * app.js ── 報價計算與畫面更新（純 JavaScript，不需要任何框架或伺服器）
- * 昶勝軍版（115/10/06）：parseRocBirth／compute／骨折圖點選邏輯沿用原工具（逐行未改），畫面改為昶勝軍 DM 風格。
+ * 115/10/06：parseRocBirth／compute／骨折圖點選邏輯沿用原工具（逐行未改），畫面改為 DM 風格。
  * ---------------------------------------------------------------------
  * 所有費率與參數都在 rates.js；本檔只放「計算邏輯」與「畫面呈現」。
  * 計算規則逐行對照原報價工具，結果應與原工具完全相同。
@@ -158,14 +158,14 @@
   }
 
   /* =====================================================================
-   * 以下為昶勝軍版畫面（115/10/06）：計算函式 compute() 與骨折圖邏輯沿用原工具，未更動。
+   * 以下為畫面（115/10/06）：計算函式 compute() 與骨折圖邏輯沿用原工具，未更動。
    * 新增：職業類別不可投保（費率「–」）提示、客戶頁連結（#q=）、下載保障彙整圖、草稿自動儲存。
    * 115/10/06 ac2：業務員姓名／職級／電話改由使用者填寫（AgentProfile，與旅平險工具共用 localStorage），隨客戶頁連結帶出。
    * ===================================================================== */
   var STORE_KEY = "yt-acc-quote-draft-v1";
   var STATE_KEYS = Object.keys(R.DEFAULTS);
   var AP = window.AgentProfile;
-  /** 客戶頁連結帶來的業務員資料（舊連結沒有 → null，只顯示「昶勝軍」） */
+  /** 客戶頁連結帶來的業務員資料（舊連結沒有 → null，不顯示業務員） */
   var linkAgent = null;
   function currentAgent() { return clientMode ? (linkAgent || AP.sanitize({})) : AP.load(); }
   var ASSET_V = (function () {
@@ -173,7 +173,7 @@
     var m = s && /[?&]v=([^&]+)/.exec(s.getAttribute("src"));
     return m ? m[1] : "";
   })();
-  var LOGO = "img/logo.png" + (ASSET_V ? "?v=" + ASSET_V : "");
+  
 
   var state = JSON.parse(JSON.stringify(R.DEFAULTS));
   var clientMode = false;
@@ -313,10 +313,9 @@
 
   function footerHtml() {
     var a = currentAgent();
-    return '<div class="sig-wrap"><img class="sig-logo" src="' + LOGO + '" alt="昶勝軍" width="88" height="88">' +
+    return '<div class="sig-wrap">' +
       '<div class="sig-text"><div class="sig-kicker">您的專屬保險顧問</div>' +
-      '<div class="sig-name">' + esc(AP.line(a)) + "</div>" +
-      '<div class="sig-unit">' + esc(AP.ORG) + "</div></div>" +
+      (AP.line(a) ? '<div class="sig-name">' + esc(AP.line(a)) + "</div>" : "") + "</div>" +
       (AP.telDigits(a.phone) ? '<a class="sig-phone" href="' + esc(AP.telHref(a.phone)) + '">☎ ' + esc(a.phone) + "</a>" : "") + "</div>" +
       '<div class="sig-disc">以上保費為試算結果，實際以富邦人壽核保為準；保障內容以保單條款為準。</div>';
   }
@@ -414,7 +413,7 @@
     if (!m.length && !smp) return "";
     var card = $("agentCard");
     if (card) { card.classList.add("flash"); setTimeout(function () { card.classList.remove("flash"); }, 1600); }
-    return smp ? "⚠ 業務員資料仍是範例（" + AP.SAMPLE.name + "）" : "⚠ 尚未填寫業務員" + m.join("、") + "，客戶只會看到「昶勝軍」";
+    return smp ? "⚠ 業務員資料仍是範例（" + AP.SAMPLE.name + "）" : "⚠ 尚未填寫業務員" + m.join("、") + "，客戶頁不會顯示業務員";
   }
   function toast(msg) {
     var t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
